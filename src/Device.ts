@@ -1,4 +1,4 @@
-import got from 'got'
+import ky from 'ky'
 import urljoin from 'url-join'
 
 import { DeviceInfo } from './typings'
@@ -100,37 +100,8 @@ export class Device {
     return this.brightness === 0 ? await this.on() : await this.off()
   }
 
-  /**
-   * Turns device on
-   */
-  public async on() {
-    const resp = (await got(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        deviceUuid: this.deviceUuid,
-        brightness: 255
-      })
-    }).json()) as any
-
-    return resp.info as string
-  }
-
-  /**
-   * Turns device off
-   */
-  public async off() {
-    const resp = (await got(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        deviceUuid: this.deviceUuid,
-        brightness: 0
-      })
-    }).json()) as any
-
-    return resp.info as string
-  }
+  public on = async () => await this.setBrightness(100) as string;
+  public off = async () => await this.setBrightness(0) as string;
 
   /**
    * Sets device brightneess between 1-100
@@ -139,33 +110,33 @@ export class Device {
   public async setBrightness(brightness: number) {
     const convertedBrightness = (brightness / 100) * 255
 
-    const resp = (await got(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        deviceUuid: this.deviceUuid,
-        brightness: convertedBrightness
-      })
-    }).json()) as any
+    const resp: any = (
+      await ky.post(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
+        headers: this.headers,
+        json: {
+          deviceUuid: this.deviceUuid,
+          brightness: convertedBrightness
+        }
+      }).json());
 
     return resp.info as string
   }
-
+  
   /**
    * Sets device color temperature between 1-100
    * @param colorTemp new device color temperature
    */
   public async setColorTemperature(colorTemp: number) {
-    const convertedColorTemp = (colorTemp / 100) * 255
+    const convertedColorTemp = (colorTemp / 100) * 255;
 
-    const resp = (await got(urljoin(this.baseUrl, '/device/deviceSetColorTemperature.json'), {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({
-        deviceUuid: this.deviceUuid,
-        colorTemperature: convertedColorTemp
-      })
-    }).json()) as any
+    const resp: any = (
+      await ky.post(urljoin(this.baseUrl, '/device/deviceSetColorTemperature.json'), {
+        headers: this.headers,
+        json: {
+          deviceUuid: this.deviceUuid,
+          colorTemperature: convertedColorTemp
+        }
+      }).json());
 
     return resp.info as string
   }

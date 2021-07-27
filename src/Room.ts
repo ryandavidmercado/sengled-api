@@ -1,4 +1,4 @@
-import got from 'got'
+import ky from 'ky';
 import urljoin from 'url-join'
 
 import { Device } from './Device'
@@ -83,31 +83,14 @@ export class Room {
    */
   public async on() {
     for (const device of this.deviceList) {
-      await got(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({
-          deviceUuid: device.deviceUuid,
-          brightness: 255
-        })
-      })
+      await this.setBrightness(100);
     }
     return 'OK'
   }
 
-  /**
-   * Turns device off
-   */
   public async off() {
     for (const device of this.deviceList) {
-      await got(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({
-          deviceUuid: device.deviceUuid,
-          brightness: 0
-        })
-      })
+      await this.setBrightness(0);
     }
     return 'OK'
   }
@@ -119,14 +102,13 @@ export class Room {
   public async setBrightness(brightness: number) {
     const convertedBrightness = (brightness / 100) * 255
     for (const device of this.deviceList) {
-      await got(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
-        method: 'POST',
+      await ky.post(urljoin(this.baseUrl, '/device/deviceSetBrightness.json'), {
         headers: this.headers,
-        body: JSON.stringify({
+        json: {
           deviceUuid: device.deviceUuid,
           brightness: convertedBrightness
-        })
-      })
+        }
+      });
     }
     return 'OK'
   }
@@ -138,13 +120,12 @@ export class Room {
   public async setColorTemperature(colorTemp: number) {
     const convertedColorTemp = (colorTemp / 100) * 255
     for (const device of this.deviceList) {
-      await got(urljoin(this.baseUrl, '/device/deviceSetColorTemperature.json'), {
-        method: 'POST',
+      await ky.post(urljoin(this.baseUrl, '/device/deviceSetColorTemperature.json'), {
         headers: this.headers,
-        body: JSON.stringify({
+        json: {
           deviceUuid: device.deviceUuid,
           colorTemperature: convertedColorTemp
-        })
+        }
       })
     }
     return 'OK'

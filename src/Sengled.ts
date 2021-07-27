@@ -1,4 +1,4 @@
-import got from 'got'
+import ky from 'ky'
 
 import { Device } from './Device'
 import { Room } from './Room'
@@ -23,16 +23,15 @@ export class Sengled {
    * @param password Sengled password
    */
   async login(username: string, password: string) {
-    const resp = (await got(`${this.baseUrl}/customer/remoteLogin.json`, {
-      method: 'POST',
+    const resp = (await ky.post(`${this.baseUrl}/customer/remoteLogin.json`, {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      json: {
         uuid: 'xxx',
         isRemote: 'true',
         user: username,
         pwd: password,
         os_type: 'ios'
-      })
+      }
     }).json()) as any
 
     if (resp.ret === 0) {
@@ -60,8 +59,7 @@ export class Sengled {
   }
 
   async getRooms() {
-    const response = await got(`${this.baseUrl}/room/getUserRoomsDetail.json`, {
-      method: 'POST',
+    const response = await ky.post(`${this.baseUrl}/room/getUserRoomsDetail.json`, {
       headers: this.headers
     }).json()
 
